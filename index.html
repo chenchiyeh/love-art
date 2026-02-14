@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy Valentines</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="loading">
+        <div class="spinner"></div>
+        <div>Loading Hand Tracking...</div>
+    </div>
+    
+    <div id="container"></div>
+    <video id="video" autoplay playsinline></video>
+    
+    <div id="controls">
+        <h1>To San:</h1>
+        
+        <div class="control-group">
+            <label>Current Shape:</label>
+            <select id="shapeSelect" disabled>
+                <option value="heart">Heart</option>
+                <option value="iloveyou">I LOVE YOU</option>
+                <option value="valentines">VALENTINE</option>
+            </select>
+        </div>
+        
+        <div class="control-group">
+            <button id="resetBtn">Reset Camera</button>
+        </div>
+        
+        <div id="status">Waiting for hands...</div>
+    </div>
+    
+    <div id="instructions">
+        <h3 style="margin-bottom: 10px; color: #ff69b4;">💕 Gesture Controls:</h3>
+        <div class="instruction-item">
+            <span class="gesture-icon">👆</span>
+            <span>Index finger up: Heart shape</span>
+        </div>
+        <div class="instruction-item">
+            <span class="gesture-icon">✌️</span>
+            <span>Peace sign: "I LOVE YOU" text</span>
+        </div>
+        <div class="instruction-item">
+            <span class="gesture-icon">🤟</span>
+            <span>I Love You sign: "VALENTINES" text</span>
+        </div>
+        <div class="instruction-item">
+            <span class="gesture-icon">🖐️</span>
+            <span>Open palm: Rotate particles</span>
+        </div>
+        <div class="instruction-item">
+            <span class="gesture-icon">👊</span>
+            <span>Closed fist: Explode effect</span>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
