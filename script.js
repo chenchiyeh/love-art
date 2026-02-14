@@ -18,7 +18,8 @@ let gestureState = {
     peace: false,
     iLoveYou: false,
     openPalm: false,
-    fist: false
+    fist: false,
+    threeFingers: false  // New gesture for bouquet
 };
 
 function init() {
@@ -112,6 +113,9 @@ function updateParticlePositions() {
             case 'valentines':
                 pos = getValentinesPosition(i);
                 break;
+            case 'bouquet':
+                pos = getBouquetPosition(i);
+                break;
             default:
                 pos = getHeartPosition(i);
         }
@@ -193,6 +197,61 @@ function getValentinesPosition(i) {
     
     // Create letter shapes
     return getLetterPosition(letter, baseX, localIndex, Math.ceil(particlesPerLetter));
+}
+
+function getBouquetPosition(i) {
+    // Create a single beautiful rose
+    const particlesForStem = particleCount * 0.25; // 25% for stem
+    const particlesForLeaves = particleCount * 0.15; // 15% for leaves
+    const particlesForRose = particleCount - particlesForStem - particlesForLeaves; // 60% for rose bloom
+    
+    if (i < particlesForStem) {
+        // STEM - curved upward
+        const stemProgress = i / particlesForStem;
+        const stemHeight = 30;
+        const curve = Math.sin(stemProgress * Math.PI) * 2; // Gentle S-curve
+        
+        return new THREE.Vector3(
+            curve,
+            -15 + stemHeight * stemProgress,
+            (Math.random() - 0.5) * 0.5
+        );
+    } else if (i < particlesForStem + particlesForLeaves) {
+        // LEAVES - two leaves on the stem
+        const leafIndex = i - particlesForStem;
+        const leafSide = leafIndex < particlesForLeaves / 2 ? -1 : 1; // Left or right leaf
+        const localIndex = leafIndex % (particlesForLeaves / 2);
+        const leafProgress = localIndex / (particlesForLeaves / 2);
+        
+        const leafAngle = leafProgress * Math.PI;
+        const leafSize = 3 * Math.sin(leafAngle); // Oval leaf shape
+        
+        return new THREE.Vector3(
+            leafSide * leafSize,
+            -5, // Middle of stem
+            (Math.random() - 0.5) * 0.5
+        );
+    } else {
+        // ROSE BLOOM - spiral petals
+        const bloomIndex = i - particlesForStem - particlesForLeaves;
+        const bloomProgress = bloomIndex / particlesForRose;
+        
+        // Create spiral rose pattern
+        const spiralTurns = 5;
+        const angle = bloomProgress * Math.PI * 2 * spiralTurns;
+        const radius = 6 * Math.sqrt(bloomProgress); // Grows outward
+        
+        // Add petal-like variation
+        const petalCount = 8;
+        const petalVariation = Math.sin(angle * petalCount) * 0.5;
+        const actualRadius = radius * (1 + petalVariation);
+        
+        return new THREE.Vector3(
+            actualRadius * Math.cos(angle),
+            15 + actualRadius * Math.sin(angle), // Rose at top
+            (Math.random() - 0.5) * 3 - bloomProgress * 2 // Depth variation
+        );
+    }
 }
 
 function getLetterPosition(letter, baseX, index, total) {
@@ -400,7 +459,10 @@ function detectGestures(landmarks) {
     gestureState.indexUp = fingersExtended[0] && !fingersExtended[1] && !fingersExtended[2] && !fingersExtended[3] && !thumbExtended;
     
     // Peace sign (index and middle extended)
-    gestureState.peace = fingersExtended[0] && fingersExtended[1] && !fingersExtended[2] && !fingersExtended[3];
+    gestureState.peace = fingersExtended[0] && fingersExtended[1] && !fingersExtended[2] && !fingersExtended[3] && !thumbExtended;
+    
+    // Three fingers (index, middle, ring extended) - for bouquet
+    gestureState.threeFingers = fingersExtended[0] && fingersExtended[1] && fingersExtended[2] && !fingersExtended[3] && !thumbExtended;
     
     // I Love You sign (thumb, index, and pinky extended)
     gestureState.iLoveYou = thumbExtended && fingersExtended[0] && !fingersExtended[1] && !fingersExtended[2] && fingersExtended[3];
@@ -425,6 +487,12 @@ function updateParticlesFromGestures() {
         updateParticlePositions();
         document.getElementById('shapeSelect').value = 'iloveyou';
         document.getElementById('status').textContent = '✌️ I LOVE YOU';
+        document.getElementById('status').style.background = 'rgba(255, 105, 180, 0.3)';
+    } else if (gestureState.threeFingers && currentShape !== 'bouquet') {
+        currentShape = 'bouquet';
+        updateParticlePositions();
+        document.getElementById('shapeSelect').value = 'bouquet';
+        document.getElementById('status').textContent = '🤘 Rose';
         document.getElementById('status').style.background = 'rgba(255, 105, 180, 0.3)';
     } else if (gestureState.iLoveYou && currentShape !== 'valentines') {
         currentShape = 'valentines';
@@ -461,7 +529,7 @@ function updateParticlesFromGestures() {
         document.getElementById('status').style.background = 'rgba(255, 20, 147, 0.4)';
     }
     
-    if (!gestureState.indexUp && !gestureState.peace && !gestureState.iLoveYou && !gestureState.openPalm && !gestureState.fist) {
+    if (!gestureState.indexUp && !gestureState.peace && !gestureState.threeFingers && !gestureState.iLoveYou && !gestureState.openPalm && !gestureState.fist) {
         if (handDetected) {
             document.getElementById('status').textContent = '✋ Hand detected';
             document.getElementById('status').style.background = 'rgba(255, 105, 180, 0.2)';
@@ -559,7 +627,8 @@ function onHandResults(results) {
             peace: false,
             iLoveYou: false,
             openPalm: false,
-            fist: false
+            fist: false,
+            threeFingers: false
         };
         document.getElementById('status').textContent = 'Waiting for hands...';
         document.getElementById('status').style.background = 'rgba(255, 105, 180, 0.2)';
